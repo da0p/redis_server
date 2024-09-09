@@ -1,0 +1,19 @@
+[package]
+name = "redis_server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5.7", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+spdlog-rs = "0.3"
+bytes = "1"
+atoi = "2.0.0"
+
+[lib]
+name = "redis_server"
+path = "src/lib/lib.rs"
+
+[[bin]]
+name = "redis_server"
+path = "src/main.rs"
