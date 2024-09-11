@@ -1,5 +1,5 @@
 pub mod server;
 
-pub const DEFAULT_PORT: u16 = 6379;
+pub const BUFFER_SIZE: usize = 65536;
 
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
