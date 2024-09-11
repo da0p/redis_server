@@ -12,7 +12,8 @@ pub struct RedisServer {
 }
 
 impl RedisServer {
-    pub async fn new(address: &str) -> Result<RedisServer, Error> {
+    pub async fn new(port: u16) -> Result<RedisServer, Error> {
+        let address = "127.0.0.1:".to_string() + &port.to_string();
         let listener = TcpListener::bind(address).await?;
 
         Ok(RedisServer {

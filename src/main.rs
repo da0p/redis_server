@@ -1,17 +1,20 @@
+use clap::Parser;
+
 use redis_server::server;
 
-use std::env;
+#[derive(Parser, Debug)]
+struct Options {
+    /// port to bind
+    #[arg(default_value_t=6379)]
+    port: u16,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), redis_server::Error> {
-    // Allow passing an address to listen on as the first argument of this
-    // program, but otherwise we'll just set up our TCP listener on
-    // 127.0.0.1:8080 for connections.
-    let addr = env::args()
-        .nth(1)
-        .unwrap_or_else(|| "127.0.0.1:6379".to_string());
 
-    let redis_server = server::RedisServer::new(&addr).await?;
+    let options = Options::parse();
+
+    let redis_server = server::RedisServer::new(options.port).await?;
 
     redis_server.execute().await?;
 
