@@ -16,7 +16,7 @@ async fn main() -> Result<(), redis_server::Error> {
 
     let redis_server = server::RedisServer::new(options.port).await?;
 
-    redis_server.execute().await?;
+    redis_server.run().await?;
 
     Ok(())
 }

@@ -6,6 +6,9 @@ use tokio::net::TcpListener;
 use crate::{Error, BUFFER_SIZE};
 
 pub mod frame;
+use frame::Frame;
+
+pub mod parser;
 
 pub struct RedisServer {
     binding_socket: TcpListener,
@@ -13,7 +16,7 @@ pub struct RedisServer {
 
 impl RedisServer {
     pub async fn new(port: u16) -> Result<RedisServer, Error> {
-        let address = "127.0.0.1:".to_string() + &port.to_string();
+        let address = format!("127.0.0.1:{}", port);
         let listener = TcpListener::bind(address).await?;
 
         Ok(RedisServer {
@@ -21,7 +24,7 @@ impl RedisServer {
         })
     }
 
-    pub async fn execute(&self) -> Result<(), Error> {
+    pub async fn run(&self) -> Result<(), Error> {
         loop {
             let (mut inbound_stream, _) = self.binding_socket.accept().await?;
 
@@ -39,14 +42,12 @@ impl RedisServer {
                     }
 
                     let mut bytes = Cursor::new(buffer.as_ref());
-                    let frame = frame::Frame::parse(&mut bytes).unwrap();
-                    match frame {
-                        frame::Frame::Integer(integer) => println!("integer = {}", integer),
-                        frame::Frame::Null => println!("nil"),
-                        frame::Frame::Bulk(_) => println!("bulk string"),
-                        frame::Frame::Simple(simple) => println!("simple string = {}", simple),
-                        frame::Frame::Array(_) => println!("array"),
-                        _ => println!("error"),
+                    if Frame::check(&mut bytes).is_ok() {
+                        let frame = Frame::parse(&mut bytes).unwrap();
+                        match frame {
+                            Frame::Array(_) => println!("hehehehe"),
+                            _ => println!("error"),
+                        }
                     }
                 }
             });
