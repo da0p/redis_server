@@ -10,6 +10,9 @@ use frame::Frame;
 
 pub mod parser;
 
+pub mod connection;
+use connection::Connection;
+
 pub struct RedisServer {
     binding_socket: TcpListener,
 }
@@ -27,27 +30,11 @@ impl RedisServer {
     pub async fn run(&self) -> Result<(), Error> {
         loop {
             let (mut inbound_stream, _) = self.binding_socket.accept().await?;
-
+            let mut connection = Connection::new(inbound_stream);
             tokio::spawn(async move {
-                let mut buffer = vec![0; BUFFER_SIZE];
-
                 loop {
-                    let number_of_bytes = inbound_stream
-                        .read(&mut buffer)
-                        .await
-                        .expect("failed to read data from socket");
-
-                    if number_of_bytes == 0 {
-                        return;
-                    }
-
-                    let mut bytes = Cursor::new(buffer.as_ref());
-                    if Frame::check(&mut bytes).is_ok() {
-                        let frame = Frame::parse(&mut bytes).unwrap();
-                        match frame {
-                            Frame::Array(_) => println!("hehehehe"),
-                            _ => println!("error"),
-                        }
+                    if let Err(err) = connection.read_frame().await {
+                        println!("connection error");
                     }
                 }
             });
